@@ -5,7 +5,7 @@ import kotlincodes.com.retrofitwithkotlin.retrofit.ApiClient
 import kotlinx.coroutines.*
 
 object ApiHelper {
-    suspend fun getListPhoto(page: Int): List<UnsplashPhoto> = withContext(Dispatchers.Default) {
-        ApiClient.getClient.getPhotos(page)
+    suspend fun getListPhoto(page: Int): List<UnsplashPhoto> {
+        return ApiClient.getClient.getPhotos(page)
     }
 }

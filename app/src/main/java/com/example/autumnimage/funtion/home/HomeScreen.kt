@@ -35,14 +35,11 @@ class HomeScreen : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        CoroutineScope(Dispatchers.Main).launch {
-            homeViewModel.getListImage().observe(viewLifecycleOwner, Observer {
-                for (item in it) {
-                    Log.d(TAG, "onViewCreated: " + item.unsplashPhoto.id)
-                }
-            })
-        }
-
+        homeViewModel.getListImage().observe(viewLifecycleOwner, Observer {
+            for (item in it) {
+                Log.d(TAG, "onViewCreated: " + item.unsplashPhoto.id)
+            }
+        })
 
         homeBinding.fab.setOnClickListener(View.OnClickListener {
             val directions = HomeScreenDirections.actionHoneToGallery()
