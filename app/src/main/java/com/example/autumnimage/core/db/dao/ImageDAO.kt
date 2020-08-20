@@ -1,25 +1,25 @@
 package com.example.autumnimage.core.db.dao
 
 import androidx.room.*
-import com.example.autumnimage.core.db.entity.ImageFile
+import com.example.autumnimage.core.db.entity.ImageEntity
 
 @Dao
 interface ImageDAO {
     @Query("SELECT * FROM images WHERE id = :id")
-    fun getUserById(id: Int): ImageFile
+    suspend fun getUserById(id: Int): ImageEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(image: ImageFile)
+    suspend fun insert(image: ImageEntity)
 
     @Query("SELECT * FROM images")
-    fun getAll(): List<ImageFile>
+    suspend fun getAll(): List<ImageEntity>
 
     @Delete
-    fun delete(image: ImageFile)
+    suspend fun delete(image: ImageEntity)
 
     @Query("DELETE FROM images")
-    fun deleteAllImage()
+    suspend fun deleteAllImage()
 
     @Update
-    fun update(image: ImageFile)
+    suspend fun update(image: ImageEntity)
 }

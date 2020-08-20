@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">AutumnImage</string>
+    <string name="title_notification">Internet not connection !</string>
+    <string name="title_load">L o a d</string>
 </resources>
