@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -24,9 +25,7 @@ import com.example.autumnimage.core.db.DBFunction
 import com.example.autumnimage.core.db.ImageDatabase
 import com.example.autumnimage.databinding.ActivityHomeScreenBinding
 import kotlinx.android.synthetic.main.activity_home_screen.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 class HomeScreen : Fragment(), OnClicked {
     val TAG = "001"
@@ -34,17 +33,31 @@ class HomeScreen : Fragment(), OnClicked {
     lateinit var homeBinding: ActivityHomeScreenBinding
     private lateinit var adapter: HomeAdapter
 
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        if (isNetworkConnected()) {
+            Toast.makeText(MyApplication().applicationContext, "open net work", Toast.LENGTH_SHORT)
+                .show()
+            homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
+            homeBinding = DataBindingUtil.inflate(layoutInflater, R.layout.activity_home_screen, container, false)
+            homeBinding.lifecycleOwner = this
+            homeBinding.homeviewmodel = homeViewModel
 
-        homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
-        homeBinding = DataBindingUtil.inflate(layoutInflater, R.layout.activity_home_screen, container, false)
-        homeBinding.lifecycleOwner = this
-        homeBinding.homeviewmodel = homeViewModel
+        }
         return homeBinding.root
-
 //        CoroutineScope(Dispatchers.Default).launch {
 //            for (item in DBFunction.getAllImage()) Log.d(TAG, "onCreateView: " + item.url)
 //        }
+
+    }
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (!isNetworkConnected()) {
+            Toast.makeText(MyApplication().applicationContext, "open net work", Toast.LENGTH_SHORT)
+                .show()
+        }
 
     }
 
@@ -78,10 +91,6 @@ class HomeScreen : Fragment(), OnClicked {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-//        homeViewModel.synchronizedData()
-    }
 
     private fun init() {
         adapter = HomeAdapter(this)
@@ -105,6 +114,8 @@ class HomeScreen : Fragment(), OnClicked {
         }
     }
 
+    var status = true
+
     // Scorll list and loadmore data
     fun initScrollListener() {
         homeBinding.rvImages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -113,15 +124,20 @@ class HomeScreen : Fragment(), OnClicked {
 
                 val gridLayoutManager: GridLayoutManager = homeBinding.rvImages.layoutManager as GridLayoutManager
 
-                if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == homeViewModel.getListSize() - 1) {
-                    Log.d(TAG, "onScrolled: list size: " + homeViewModel.getListSize())
+                if (status) {
+                    if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == homeViewModel.getListSize() - 1) {
+                        Log.d(TAG, "onScrolled: list size: " + homeViewModel.getListSize())
 
-                    CoroutineScope(Dispatchers.Main).launch {
-                        progress_bar.visibility = View.VISIBLE
-                        homeViewModel.loadMore()
-                        progress_bar.visibility = View.GONE
+                        status = false
+                        CoroutineScope(Dispatchers.Main).launch {
+                            progress_bar.visibility = View.VISIBLE
+                            delay(2000)
+                            homeViewModel.loadMore()
+                            progress_bar.visibility = View.GONE
+                            status = true
+                        }
+
                     }
-
                 }
             }
 

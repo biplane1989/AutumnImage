@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel : ViewModel() {
 
     val TAG = "001"
-    private var page = 1;
+    private var page = 0;
     private var images: MutableLiveData<ArrayList<ImageItemView>> = MutableLiveData()
     private var _images = ArrayList<ImageItemView>()
     private val loadMoreInfo = MutableLiveData<LoadMoreInfo>()
@@ -41,7 +41,7 @@ class HomeViewModel : ViewModel() {
 
     fun initData() {
         CoroutineScope(Dispatchers.Default).launch {
-            for (item in ApiHelper.getListPhoto(page)) {
+            for (item in ApiHelper.getListPhoto(++page)) {
                 _images.add(ImageItemView(item))
             }
             images.postValue(_images)
@@ -82,24 +82,45 @@ class HomeViewModel : ViewModel() {
         images.postValue(_images)
     }
 
-    // load more data and set status progressbar loading
-    suspend fun loadMore(): LiveData<LoadMoreInfo> {
-        if (_LoadMoreInfo.loadingState == LoadMoreState.LOADING) {
-            return loadMoreInfo
-        }
-        _LoadMoreInfo.loadingState = LoadMoreState.LOADING
-        loadMoreInfo.postValue(_LoadMoreInfo)
-//        CoroutineScope(Dispatchers.Main).launch {
-            delay(500)
-            _LoadMoreInfo.loadingState = LoadMoreState.DONE
-            loadMoreInfo.postValue(_LoadMoreInfo)
-            for (item in ApiHelper.getListPhoto(page++)) {
-                _images.add(ImageItemView(item))
-            }
-            images.postValue(_images)
+//    // load more data and set status progressbar loading
+//    suspend fun loadMore(): LiveData<LoadMoreInfo> {
+////        if (_LoadMoreInfo.loadingState == LoadMoreState.LOADING) {
+////            return loadMoreInfo
+////        }
+////        _LoadMoreInfo.loadingState = LoadMoreState.LOADING
+////        loadMoreInfo.postValue(_LoadMoreInfo)
+////        CoroutineScope(Dispatchers.Main).launch {
+////            delay(500)
+////            _LoadMoreInfo.loadingState = LoadMoreState.DONE
+////            loadMoreInfo.postValue(_LoadMoreInfo)
+//
+//            for (item in ApiHelper.getListPhoto(++page)) {
+//                _images.add(ImageItemView(item))
+//            }
+//            images.postValue(_images)
+////        }
+//        return loadMoreInfo
+//    }
+
+    suspend fun loadMore() {
+//        if (_LoadMoreInfo.loadingState == LoadMoreState.LOADING) {
+//            return loadMoreInfo
 //        }
-        return loadMoreInfo
+//        _LoadMoreInfo.loadingState = LoadMoreState.LOADING
+//        loadMoreInfo.postValue(_LoadMoreInfo)
+//        CoroutineScope(Dispatchers.Main).launch {
+//            delay(500)
+//            _LoadMoreInfo.loadingState = LoadMoreState.DONE
+//            loadMoreInfo.postValue(_LoadMoreInfo)
+
+        for (item in ApiHelper.getListPhoto(++page)) {
+            _images.add(ImageItemView(item))
+        }
+        images.postValue(_images)
+//        }
+
     }
+
 
     suspend fun saveImage(context: Context, imageItem: ImageItem, position: Int) {
 
