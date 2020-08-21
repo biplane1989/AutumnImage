@@ -11,4 +11,5 @@ class ImageDiffCallBack : DiffUtil.ItemCallback<ImageItemView>() {
     override fun areContentsTheSame(oldItemView: ImageItemView, newItemView: ImageItemView): Boolean {
         return oldItemView == newItemView
     }
+
 }

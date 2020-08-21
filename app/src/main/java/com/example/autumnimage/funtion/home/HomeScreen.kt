@@ -1,10 +1,16 @@
 package com.example.autumnimage.funtion.home
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -31,50 +37,50 @@ class HomeScreen : Fragment(), OnClicked {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel::class.java)
-//        homeViewModel.setContext(activity!!.applicationContext)
         homeBinding = DataBindingUtil.inflate(layoutInflater, R.layout.activity_home_screen, container, false)
         homeBinding.lifecycleOwner = this
         homeBinding.homeviewmodel = homeViewModel
         return homeBinding.root
 
-        CoroutineScope(Dispatchers.Default).launch {
-            for (item in DBFunction.getAllImage()) Log.d(TAG, "onCreateView: " + item.url)
-        }
+//        CoroutineScope(Dispatchers.Default).launch {
+//            for (item in DBFunction.getAllImage()) Log.d(TAG, "onCreateView: " + item.url)
+//        }
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        init()
+        if (isNetworkConnected()) {
+            init()
+            tv_internet.visibility = View.GONE
 
-        // adapternotification()
-        homeViewModel.getListImage().observe(viewLifecycleOwner, Observer { listImage ->
-            adapter.submitList(ArrayList(listImage))
+            homeViewModel.getListImage().observe(viewLifecycleOwner, Observer { listImage ->
+                adapter.submitList(ArrayList(listImage))
+                Log.d(TAG, "getListSize: list size " + listImage.size)
+            })
 
-        })
+//            // change status loading
+//            homeViewModel.loadMore().observe(viewLifecycleOwner, Observer { statusLoad ->
+//                if (LoadMoreState.DONE == statusLoad.loadingState) {
+//                    homeBinding.progressBar.visibility = View.INVISIBLE
+//                }
+//                if (LoadMoreState.LOADING == statusLoad.loadingState) {
+//                    homeBinding.progressBar.visibility = View.VISIBLE
+//                }
+//            })
 
-        // change status loading
-        homeViewModel.loadMore().observe(viewLifecycleOwner, Observer { statusLoad ->
-            if (LoadMoreState.DONE == statusLoad.loadingState) {
-                homeBinding.progressBar.visibility = View.INVISIBLE
-            }
-            if (LoadMoreState.LOADING == statusLoad.loadingState) {
-                homeBinding.progressBar.visibility = View.VISIBLE
-            }
-        })
-
-        // go to gallery screen
-        homeBinding.fab.setOnClickListener(View.OnClickListener {
-            val directions = HomeScreenDirections.actionHoneToGallery()
-            NavHostFragment.findNavController(this).navigate(directions)
-        })
-
-        CoroutineScope(Dispatchers.Main).launch {
-            for (item in ImageDatabase.getInstance().imageDAO().getAll()) {
-                Log.d(TAG, "onViewCreated: database: id : " + item.id + " uri: " + item.uri + " url: " + item.url)
-            }
+            // go to gallery screen
+            homeBinding.fab.setOnClickListener(View.OnClickListener {
+                val directions = HomeScreenDirections.actionHoneToGallery()
+                NavHostFragment.findNavController(this).navigate(directions)
+            })
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+//        homeViewModel.synchronizedData()
     }
 
     private fun init() {
@@ -87,10 +93,16 @@ class HomeScreen : Fragment(), OnClicked {
     }
 
     // item clicked
-    override fun onClicked(position: Int, imageItemView: ImageItemView) {
+    override fun onClicked(position: Int, imageItemView: ImageItemView, textView: TextView, progressBar: ProgressBar) {
         Log.d(TAG, "onClicked: " + position)
-        homeViewModel.saveImage(activity!!.applicationContext, imageItemView.imageItem, position)
-//        homeViewModel.setVisiblityLoading(position)
+        CoroutineScope(Dispatchers.Main).launch {
+//            progressBar.visibility = View.VISIBLE
+
+            homeViewModel.saveImage(activity!!.applicationContext, imageItemView.imageItem, position)
+
+            textView.visibility = View.GONE
+            progressBar.visibility = View.GONE
+        }
     }
 
     // Scorll list and loadmore data
@@ -103,7 +115,13 @@ class HomeScreen : Fragment(), OnClicked {
 
                 if (gridLayoutManager.findLastCompletelyVisibleItemPosition() == homeViewModel.getListSize() - 1) {
                     Log.d(TAG, "onScrolled: list size: " + homeViewModel.getListSize())
-                    homeViewModel.loadMore()
+
+                    CoroutineScope(Dispatchers.Main).launch {
+                        progress_bar.visibility = View.VISIBLE
+                        homeViewModel.loadMore()
+                        progress_bar.visibility = View.GONE
+                    }
+
                 }
             }
 
@@ -113,5 +131,10 @@ class HomeScreen : Fragment(), OnClicked {
         })
     }
 
+    private fun isNetworkConnected(): Boolean {
+        val cm: ConnectivityManager = activity?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo()!!.isConnected()
+    }
 
 }
+

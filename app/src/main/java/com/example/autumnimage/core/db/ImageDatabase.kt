@@ -6,6 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.autumnimage.core.db.dao.ImageDAO
 import com.example.autumnimage.core.db.entity.ImageEntity
+import com.example.autumnimage.utils.Constance
 
 @Database(entities = [ImageEntity::class], version = 1)
 abstract class ImageDatabase : RoomDatabase() {
@@ -27,7 +28,7 @@ abstract class ImageDatabase : RoomDatabase() {
         }
 
         private fun buildDatabase(context: Context) =
-            Room.databaseBuilder(context.applicationContext, ImageDatabase::class.java, "Images.db")
+            Room.databaseBuilder(context.applicationContext, ImageDatabase::class.java, Constance.DB_NAME)
                 .build()
     }
 

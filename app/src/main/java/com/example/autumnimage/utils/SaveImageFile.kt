@@ -3,6 +3,7 @@ package com.example.autumnimage.utils
 import android.content.Context
 import android.content.ContextWrapper
 import android.graphics.Bitmap
+import android.widget.Toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -34,9 +35,11 @@ object SaveImageFile {
             mypath.absolutePath
         }
 
-    suspend fun deleteImage(uri: String) = withContext(Dispatchers.Default) {
+    suspend fun deleteImageFile(uri: String) = withContext(Dispatchers.Default) {
         val fdelete = File(uri)
         if (fdelete.exists()) {
+            fdelete.delete()
         }
     }
+
 }

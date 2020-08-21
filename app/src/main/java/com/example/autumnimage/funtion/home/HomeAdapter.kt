@@ -33,6 +33,7 @@ class HomeAdapter(val onClicked: OnClicked) :
         val tvLoad: TextView = itemView.findViewById(R.id.tv_load)
         val progressImage: ProgressBar = itemView.findViewById(R.id.progress_image)
 
+
         fun bind(onClicked: OnClicked) {
             val imageItem = adapter.getItem(adapterPosition)
 
@@ -46,15 +47,9 @@ class HomeAdapter(val onClicked: OnClicked) :
             }
 
             tvLoad.setOnClickListener(View.OnClickListener {
-                onClicked.onClicked(adapterPosition, imageItem)
                 progressImage.visibility = View.VISIBLE
-
+                onClicked.onClicked(adapterPosition, imageItem, tvLoad, progressImage)
             })
-
-//            tvLoad.setOnLongClickListener(View.OnLongClickListener {
-//
-//                true
-//            })
         }
     }
 }

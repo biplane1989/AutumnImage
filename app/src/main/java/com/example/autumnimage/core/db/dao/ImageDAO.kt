@@ -9,7 +9,7 @@ interface ImageDAO {
     suspend fun getUserById(id: Int): ImageEntity
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(image: ImageEntity)
+    suspend fun insert(image: ImageEntity): Long
 
     @Query("SELECT * FROM images")
     suspend fun getAll(): List<ImageEntity>

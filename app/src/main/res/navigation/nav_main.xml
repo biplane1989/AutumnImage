@@ -43,12 +43,12 @@
         android:name="com.example.autumnimage.funtion.detail.DetailScreen"
         android:label="detail screen"
         tools:layout="@layout/activity_detail_screen">
-<!--        <argument-->
-<!--            android:name="path"-->
-<!--            android:defaultValue="0"-->
-<!--            app:argType="String" />-->
+        <argument
+            android:name="id"
+            android:defaultValue="0"
+            app:argType="integer" />
         <action
-            android:id="@+id/action_hone_to_gallery"
+            android:id="@+id/action_detail_to_gallery"
             app:destination="@+id/fra_gallery"
             app:popUpTo="@+id/fra_gallery"
             app:popUpToInclusive="true" />

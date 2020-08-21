@@ -11,6 +11,7 @@ import com.example.autumnimage.`object`.ImageItem
 import com.example.autumnimage.core.ApiHelper
 import com.example.autumnimage.core.FileDownloadManager
 import com.example.autumnimage.core.db.entity.ImageEntity
+import com.google.android.material.dialog.MaterialDialogs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
+    val TAG = "001"
     private var page = 1;
     private var images: MutableLiveData<ArrayList<ImageItemView>> = MutableLiveData()
     private var _images = ArrayList<ImageItemView>()
@@ -46,9 +48,30 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    fun synchronizedData() {
+        CoroutineScope(Dispatchers.Main).launch {
+            val newListImage = ArrayList<ImageItemView>()
+            for (image in _images) {
+                newListImage.add(image)
+            }
+            var position = 0;
+            for (image in newListImage) {
+                if (!FileDownloadManager.isDownloaded(ImageItem(image.imageItem.url, image.imageItem.thumb, image.imageItem.raw, image.imageItem.downloaded))) {
+                    val newImage = image.copy()
+                    newImage.imageItem.downloaded = false
+//                    newImage.status = false
+                    newListImage.set(position, newImage)
+                }
+                position++
+            }
+            images.postValue(newListImage)
+        }
+    }
+
     //set visiblity loading
     fun setVisiblityLoading(position: Int) {
         val newImageList = ArrayList<ImageItemView>()
+
         _images.forEach {
             newImageList.add(it)
         }
@@ -60,35 +83,33 @@ class HomeViewModel : ViewModel() {
     }
 
     // load more data and set status progressbar loading
-    fun loadMore(): LiveData<LoadMoreInfo> {
+    suspend fun loadMore(): LiveData<LoadMoreInfo> {
         if (_LoadMoreInfo.loadingState == LoadMoreState.LOADING) {
             return loadMoreInfo
         }
         _LoadMoreInfo.loadingState = LoadMoreState.LOADING
         loadMoreInfo.postValue(_LoadMoreInfo)
-        CoroutineScope(Dispatchers.Main).launch {
-            delay(1000)
+//        CoroutineScope(Dispatchers.Main).launch {
+            delay(500)
             _LoadMoreInfo.loadingState = LoadMoreState.DONE
             loadMoreInfo.postValue(_LoadMoreInfo)
-            for (item in ApiHelper.getListPhoto(++page)) {
-
+            for (item in ApiHelper.getListPhoto(page++)) {
                 _images.add(ImageItemView(item))
             }
             images.postValue(_images)
-        }
+//        }
         return loadMoreInfo
     }
 
-    fun saveImage(context: Context, imageItem: ImageItem, position: Int) {
+    suspend fun saveImage(context: Context, imageItem: ImageItem, position: Int) {
 
-        CoroutineScope(Dispatchers.Main).launch {
-
+//        CoroutineScope(Dispatchers.Main).launch {
             val imageFile = FileDownloadManager.downloadImage(context, imageItem)
             if (imageFile != null) {
-                setVisiblityLoading(position)
+//                setVisiblityLoading(position)
             } else {
                 Log.d("001", "saveImage: uri nulllllllllllllllll")
             }
-        }
+//        }
     }
 }
